@@ -1,0 +1,30 @@
+Version 1.0 (December 2015)
+- Initial release
+- Content modules: DEIProgram, FEA_Program, PostParaview, MATLAB plotting modules, ABAQUS reader/writer
+- Element types included:
+  - Two-dimensional: 3-node triangle, 4-node quadrilateral, 6-node triangle, 9 node quadrilateral
+  - Three-dimensional: 4-node tetrahedra, 8-node brick, 10-node tetrahedra, 27-node brick
+- Coupler types included:
+  - Zero-thickness facet elements (cohesive zone); discontinuous Galerkin elements
+  - Two-dimensional: 3-node triangle, 4-node quadrilateral, 6-node triangle, 9 node quadrilateral
+  - Three-dimensional: 4-node tetrahedra, 8-node brick, 10-node tetrahedra, 27-node brick
+
+Version 1.1 (April 2016)
+- Expanded content module examples for ABAQUS reader/writer
+- Added mesh converter for 4-node quadrilateral to 3-node triangle
+
+Version 1.2 (October 2017)
+- Created data-structure of interfacial arrays and associated helper functions to streamline the I/O of the DEIProgram modules
+- Created utility functions to query the output mesh and coupler topology, such as which couplers are attached to which regions
+- Regrouped example files to highlight capabilities such as multi-material model examples
+- Bug fixes for ABAQUS reader/writer
+- Treatment of periodic boundary conditions (under development, in “dev” branch)
+- Added more mesh conversion scripts along with example files
+
+Version 1.3 (May 2018)
+- Added content module for Gmsh mesh reader/writer
+- Command file for execution of Code_Aster cohesive zone analysis with sample Gmsh file produced by DEIProgram
+- Bug fixes for Octave compatibility
+- Added workflow demonstration in Section 1.4 for mesh generation, coupler insertion, mechanical analysis, and results visualization
+- Expanded element types: 5-node pyramid and 14-node pyramid
+

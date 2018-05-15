@@ -1,0 +1,155 @@
+# cantilevern
+# SQUARE PLATE SUBJECTED TO POINT LOAD
+
+DEBUT();
+
+#Parameters from ssna115b
+tfin = 10;
+
+nbpas = tfin;
+
+nbarch = nbpas;
+
+PRE_GMSH();
+
+#U4.21.01
+MA=LIRE_MAILLAGE(FORMAT='ASTER',
+                       UNITE=20,
+);
+
+IMPR_RESU(
+    FORMAT='MED',
+    UNITE=71,
+    RESU=_F(MAILLAGE=MA, ) ,
+) ;
+
+MA=MODI_MAILLAGE(reuse =MA,
+                 MAILLAGE=MA,
+                 ORIE_FISSURE=_F(GROUP_MA='GM7'),
+                 )
+
+MODMECA=AFFE_MODELE(MAILLAGE=MA,
+                    AFFE=(_F(GROUP_MA=('GM1','GM2','GM3','GM4','GM6','GM5'),
+                            PHENOMENE='MECANIQUE',
+                            MODELISATION='C_PLAN',),
+                     _F(GROUP_MA='GM7',
+                        PHENOMENE='MECANIQUE',
+                        MODELISATION='PLAN_JOINT',),),);
+
+bulk1=DEFI_MATERIAU(ELAS=_F(E=1.0e+2,
+                               NU=0.25,
+                               RHO=1.0,),);
+
+bulk2=DEFI_MATERIAU(ELAS=_F(E=1.0e+2,
+                               NU=0.25,
+                               RHO=1.0,),);
+
+CZM1=DEFI_MATERIAU(RUPT_FRAG=_F(GC=0.3,
+                                 SIGM_C=3.0,
+                                 PENA_ADHERENCE=0.00001,),);
+
+CHMAT=AFFE_MATERIAU(MAILLAGE=MA,
+                    AFFE=(
+                          _F(GROUP_MA='GM6',
+                            MATER=bulk2,),
+                          _F(GROUP_MA='GM5',
+                            MATER=bulk1,),
+                          _F(GROUP_MA='GM7',
+                            MATER=CZM1,),
+                          
+                          ),
+                    );
+
+CINE0=AFFE_CHAR_CINE(MODELE=MODMECA,
+                     MECA_IMPO=(_F(GROUP_MA='GM1',
+                                   DY=0.0,),
+                                _F(GROUP_MA='GM2',
+                                   DX=0.0,),
+                                _F(GROUP_MA='GM3',
+                                   DX=0.0,),
+                                _F(GROUP_MA=('GM6','GM5'),
+                                   DZ=0.0,
+                                   DRX=0.0,
+                                   DRY=0.0,),),);
+
+CHARGE1=AFFE_CHAR_MECA(MODELE=MODMECA,
+                     DDL_IMPO=(_F(GROUP_MA='GM4',
+                                   DY=0.2,),),);
+
+deb=0.0
+L_INST=DEFI_LIST_REEL(DEBUT   = deb,
+     INTERVALLE=(
+      #_F( JUSQU_A = 0,        NOMBRE = 1 ),
+      _F( JUSQU_A = tfin  ,   NOMBRE = nbpas ),
+
+      ))
+
+# DEFINITION DE L'EVOLUTION DU CHARGEMENT                )
+FCT = DEFI_FONCTION(
+  NOM_PARA = 'INST',
+  VALE     = (-1,0 ,  0,0,   tfin ,1.0 ),
+  
+                )
+DEFLIST =DEFI_LIST_INST(DEFI_LIST=_F(LIST_INST = L_INST ),
+                        ECHEC=_F(
+                  ACTION       = 'DECOUPE',
+                  SUBD_METHODE = 'MANUEL',
+                  SUBD_PAS  = 5,
+                  SUBD_PAS_MINI = 1.E-10,
+                  SUBD_NIVEAU=10,
+                                 ))
+
+EVOL=STAT_NON_LINE(MODELE=MODMECA,
+                   CHAM_MATER=CHMAT,
+                    EXCIT=(_F(CHARGE=CINE0,),
+                           _F(CHARGE=CHARGE1,
+                             FONC_MULT=FCT,),),
+                   COMPORTEMENT=(_F(RELATION='ELAS',
+                                 GROUP_MA=('GM6','GM5'),),
+                              _F(RELATION='CZM_LIN_REG',
+                                 GROUP_MA='GM7',),),
+                   INCREMENT=_F(LIST_INST=DEFLIST,
+                                INST_FIN=tfin,),
+                   NEWTON=_F(MATRICE='TANGENTE',
+                             REAC_ITER=1,),
+                   CONVERGENCE=_F(ITER_GLOB_MAXI=10,),);
+
+EVOL=CALC_CHAMP(reuse =EVOL,
+             RESULTAT=EVOL,
+             CONTRAINTE=('SIGM_ELNO','SIGM_NOEU',), 
+             GROUP_MA=('GM6','GM5'),);
+
+
+TEST_RESU(RESU=(_F(RESULTAT=EVOL,
+                   NUME_ORDRE=1,
+                   NOM_CHAM='DEPL',
+                   NOM_CMP='DY',
+                   NOEUD='N9',
+                   CRITERE='RELATIF',
+                   VALE_CALC=-7.15339782224E-08,
+                   PRECISION=0.1,
+                   REFERENCE='SOURCE_EXTERNE',
+                   VALE_REFE=-7.7596e-08,),),);
+
+IMPR_RESU(FORMAT='RESULTAT',
+          RESU=(_F(RESULTAT=EVOL,
+                  NOM_CHAM='DEPL',),
+                _F(RESULTAT=EVOL,
+                  NOM_CHAM='SIGM_ELNO',),),);
+
+#IMPR_RESU(FORMAT='MED',
+#          UNITE=80,
+#          RESU=(_F(MAILLAGE=MA,
+#                  RESULTAT=EVOL,
+#                  NOM_CHAM='DEPL',),
+#                _F(MAILLAGE=MA,
+#                  RESULTAT=EVOL,
+#                  NOM_CHAM = 'SIGM_ELNO',),),);
+
+IMPR_RESU(FORMAT='MED',
+          UNITE=80,
+          RESU=_F(MAILLAGE=MA,
+                  RESULTAT=EVOL,
+                  NOM_CHAM='DEPL',),);
+
+FIN(FORMAT_HDF='OUI',);

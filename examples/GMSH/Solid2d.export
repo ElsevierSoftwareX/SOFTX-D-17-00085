@@ -1,0 +1,20 @@
+P actions make_etude
+P memjob 512000
+P memory_limit 500.0
+P mode interactif
+P mpi_nbcpu 1
+P mpi_nbnoeud 1
+P ncpus 1
+P rep_trav /tmp/ttruster-designstar-interactif.8928
+P testlist verification sequential
+P time_limit 60.0
+P tpsjob 2
+P version stable
+A memjeveux 62.5
+A tpmax 60.0
+F comm /home/ttruster/_Modeling/Manuscript_015/DEIP/Standard/Gmsh2/Solid2d.comm D  1
+F comm /home/ttruster/_Modeling/Manuscript_015/DEIP/Standard/Gmsh2/Solid2d.msh D  19
+F resu /home/ttruster/_Modeling/Manuscript_015/DEIP/Standard/Gmsh2/Solid2d.mail R  20
+F mess /home/ttruster/_Modeling/Manuscript_015/DEIP/Standard/Gmsh2/Solid2d.mess R  6
+F resu /home/ttruster/_Modeling/Manuscript_015/DEIP/Standard/Gmsh2/Solid2d.resu R  8
+F rmed /home/ttruster/_Modeling/Manuscript_015/DEIP/Standard/Gmsh2/Solid2d.rmed R  80
